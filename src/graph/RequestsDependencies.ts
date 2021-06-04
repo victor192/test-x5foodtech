@@ -17,10 +17,18 @@ export class RequestsDependencies {
     addDependency(name: string, request: InputRequest) {
       if (this.requests.has(name)) {
         const requestDependency = this.requests.get(name)!;
+        const { name: requestName } = request;
+        const index = requestDependency.dependencies.findIndex((req) => req.name === requestName);
 
-        requestDependency.dependencies.push(request);
+        if (index === -1) {
+          requestDependency.dependencies.push(request);
+        }
 
         this.requests.set(name, requestDependency);
       }
+    }
+
+    getRequests() {
+      return this.requests;
     }
 }

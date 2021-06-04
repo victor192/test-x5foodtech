@@ -6,7 +6,11 @@ async function main() {
     const requestsGraph = buildRequestsGraph(requests);
     const requestsDependencies = buildRequestsDependencies(requestsGraph);
 
-    console.log(requestsDependencies);
+    const dependencies = requestsDependencies.getRequests();
+
+    dependencies.forEach((depencency) => {
+      console.log(`Request: ${depencency.request.name} dependencies: [${depencency.dependencies.map((request) => request.name).join(', ')}]`);
+    });
 
     const response = await getResponse(requestsGraph, { id: 'id' });
 

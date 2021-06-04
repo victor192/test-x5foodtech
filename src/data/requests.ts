@@ -16,7 +16,6 @@ export const requests: InputRequest[] = [
     important: false,
     params: {
       id: 'getUser.id',
-      name: 'getUser.name',
     },
   },
   {
@@ -34,7 +33,7 @@ export const requests: InputRequest[] = [
     method: 'GET',
     important: false,
     params: {
-      id: 'getUsersFriend.bestfriends_id',
+      id: 'getUsersFriend.address_id',
     },
   },
 ];

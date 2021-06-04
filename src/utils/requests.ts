@@ -8,7 +8,7 @@ import { RequestsDependencies } from '../graph/RequestsDependencies';
 export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
   const requestsGraph = new RequestsGraph();
 
-  requests.forEach((request) => {
+  requests.forEach((request, index) => {
     const { name, method, params } = request;
 
     if (requestsGraph.isVertex(name)) {
@@ -18,6 +18,7 @@ export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
     }
 
     const node = requestsGraph.addVertex(name, request);
+    let relatedParamsCount = 0;
 
     Object.keys(params).forEach((param) => {
       const paramValue = params[param];
@@ -26,6 +27,8 @@ export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
       if (parts.length > 2) {
         throw new Error(`${name}: Invalid value of param '${paramValue}'`);
       } else if (parts.length === 2) {
+        relatedParamsCount += 1;
+
         const relatedValue = parts[0];
         const relatedParam = parts[1];
         const relatedNode = requestsGraph.getVertex(relatedValue);
@@ -47,11 +50,15 @@ export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
           { value: name, data: request },
         );
 
-        node.addInputParam(relatedParam, relatedInputParam);
+        node.addInputParam(param, relatedInputParam);
       } else {
         node.addInputParam(param, paramValue);
       }
     });
+
+    if (index !== 0 && relatedParamsCount === 0) {
+      throw new Error(`${name}: Node is not connected`);
+    }
   });
 
   return requestsGraph;
@@ -111,10 +118,12 @@ export const getResponse = async (
     const requestParams = {} as InputRequestParams;
 
     Object.keys(inputParams).forEach((param) => {
-      if (!inputParamsObject[param] && important) {
-        throw new Error(`Invalid param '${param}'`);
+      const inputParam = inputParams[param];
+
+      if (!inputParamsObject[inputParam] && important) {
+        throw new Error(`Invalid param '${inputParam}'`);
       } else if (!important) {
-        requestParams[param] = inputParamsObject[param];
+        requestParams[param] = inputParamsObject[inputParam];
       }
 
       const { name, url, method } = request;
