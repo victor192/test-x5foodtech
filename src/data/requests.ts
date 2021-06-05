@@ -25,6 +25,7 @@ export const requests: InputRequest[] = [
     important: true,
     params: {
       address_id: 'getAddressCoordinate.id',
+      user_id: 'getUser.id',
     },
   },
   {

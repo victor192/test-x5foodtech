@@ -1,15 +1,19 @@
 import { requests } from './data/requests';
-import { buildRequestsGraph, buildRequestsDependencies, getResponse } from './utils/requests';
+import { buildRequestsGraph, getResponse } from './utils/requests';
 
 async function main() {
   try {
     const requestsGraph = buildRequestsGraph(requests);
-    const requestsDependencies = buildRequestsDependencies(requestsGraph);
+    const nodes = requestsGraph.getNodes();
 
-    const dependencies = requestsDependencies.getRequests();
+    nodes.forEach((node, name) => {
+      const adjacents = node.getAdjacents();
 
-    dependencies.forEach((depencency) => {
-      console.log(`Request: ${depencency.request.name} dependencies: [${depencency.dependencies.map((request) => request.name).join(', ')}]`);
+      console.log(`Request: ${name} dependencies: [${adjacents.map((adjecent) => {
+        const request = adjecent.getData();
+
+        return request.name;
+      }).join(', ')}]`);
     });
 
     const response = await getResponse(requestsGraph, { id: 'id' });

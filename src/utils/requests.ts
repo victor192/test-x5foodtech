@@ -2,8 +2,6 @@ import { AsyncAutoTasks, auto } from 'async';
 import axios, { AxiosRequestConfig } from 'axios';
 import { isOfTypeHttpMethod, InputRequest, InputRequestParams } from '../interfaces/input-request.interface';
 import { RequestsGraph } from '../graph/RequestsGraph';
-import { RequestsNode } from '../graph/RequestsNode';
-import { RequestsDependencies } from '../graph/RequestsDependencies';
 
 export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
   const requestsGraph = new RequestsGraph();
@@ -46,8 +44,8 @@ export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
         }
 
         requestsGraph.addEdge(
-          { value: relatedValue, data: relatedData },
           { value: name, data: request },
+          { value: relatedValue, data: relatedData },
         );
 
         node.addInputParam(param, relatedInputParam);
@@ -62,46 +60,6 @@ export const buildRequestsGraph = (requests: InputRequest[]): RequestsGraph => {
   });
 
   return requestsGraph;
-};
-
-const buildRequestDependencies = (
-  requestsDependencies: RequestsDependencies,
-  parentNode: RequestsNode,
-  currentNode: RequestsNode,
-) => {
-  const currentRequest = currentNode.getData();
-  const { name: currentName } = currentRequest;
-
-  requestsDependencies.addRequest(currentName, currentRequest);
-
-  const parentRequest = parentNode.getData();
-  const { name: parentName } = parentRequest;
-
-  requestsDependencies.addDependency(parentName, currentRequest);
-
-  const adjacents = currentNode.getAdjacents();
-
-  adjacents.forEach((node) => {
-    buildRequestDependencies(requestsDependencies, currentNode, node);
-  });
-};
-
-export const buildRequestsDependencies = (requestsGraph: RequestsGraph): RequestsDependencies => {
-  const nodes = requestsGraph.getNodes();
-  const requestsDependencies = new RequestsDependencies();
-
-  nodes.forEach((node, value) => {
-    const request = node.getData();
-    const adjacents = node.getAdjacents();
-
-    requestsDependencies.addRequest(value, request);
-
-    adjacents.forEach((childNode) => {
-      buildRequestDependencies(requestsDependencies, node, childNode);
-    });
-  });
-
-  return requestsDependencies;
 };
 
 export const getResponse = async (
